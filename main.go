@@ -28,7 +28,7 @@ type Training struct {
 // количество_повторов * длина_шага / м_в_км
 func (t Training) distance() float64 {
 	// вставьте ваш код ниже
-	// проверка на абсурдное значение (отрицательное) или ложное положительное
+	// Проверка на абсурдное значение.
 	if t.Action < 0 || t.LenStep < 0 {
 		return 0
 	}
@@ -38,7 +38,7 @@ func (t Training) distance() float64 {
 // meanSpeed возвращает среднюю скорость бега или ходьбы.
 func (t Training) meanSpeed() float64 {
 	// вставьте ваш код ниже
-	if t.Duration.Hours() <= 0 {
+	if t.Duration <= 0 {
 		return 0
 	}
 	return t.distance() / t.Duration.Hours()
@@ -69,6 +69,10 @@ func (t Training) TrainingInfo() InfoMessage {
 		Distance:     t.distance(),
 		Speed:        t.meanSpeed(),
 		Calories:     t.Calories(),
+	}
+	// Исключение отображения абсурдного (отрицательного) значения длительности.
+	if t.Duration < 0 {
+		info.Duration = 0
 	}
 	return info
 }
@@ -107,9 +111,9 @@ type Running struct {
 // Формула расчета:
 // ((18 * средняя_скорость_в_км/ч + 1.79) * вес_спортсмена_в_кг / м_в_км * время_тренировки_в_часах * мин_в_часе)
 // Это переопределенный метод Calories() из Training.
-// проверка на абсурдное значение (отрицательное) или ложное положительное, meanSpeed() не беру, т.к. в нем самом есть проверка.
+// Проверка на абсурдное значение.
 func (r Running) Calories() float64 {
-	if r.Weight < 0 || r.Duration.Hours() < 0 {
+	if r.Weight <= 0 || r.Duration <= 0 || r.meanSpeed() <= 0 {
 		return 0
 	}
 	return ((CaloriesMeanSpeedMultiplier*r.meanSpeed() + CaloriesMeanSpeedShift) *
@@ -143,8 +147,8 @@ type Walking struct {
 // Это переопределенный метод Calories() из Training.
 func (w Walking) Calories() float64 {
 	// вставьте ваш код ниже
-	// проверка на абсурдное значение (отрицательное) или ложное положительное, meanSpeed() не беру, т.к. в нем самом есть проверка.
-	if w.Height <= 0 || w.Weight < 0 || w.Duration < 0 {
+	// Проверка на абсурдное значение.
+	if w.Height <= 0 || w.Weight <= 0 || w.Duration <= 0 || w.meanSpeed() <= 0 {
 		return 0
 	}
 	return ((CaloriesWeightMultiplier*w.Weight + (math.Pow(w.meanSpeed()*KmHInMsec, 2)/(w.Height/CmInM))*CaloriesSpeedHeightMultiplier*w.Weight) *
@@ -180,8 +184,8 @@ type Swimming struct {
 // Это переопределенный метод meanSpeed() из Training.
 func (s Swimming) meanSpeed() float64 {
 	// вставьте ваш код ниже
-	// проверка на абсурдное значение (отрицательное) или ложное положительное.
-	if s.Duration.Hours() <= 0 || float64(s.LengthPool) < 0 || float64(s.CountPool) < 0 {
+	// Проверка на абсурдное значение.
+	if s.Duration <= 0 || s.LengthPool <= 0 || s.CountPool <= 0 {
 		return 0
 	}
 
@@ -194,11 +198,12 @@ func (s Swimming) meanSpeed() float64 {
 // Это переопределенный метод Calories() из Training.
 func (s Swimming) Calories() float64 {
 	// вставьте ваш код ниже
-	// проверка на абсурдное значение (отрицательное) или ложное положительное, meanSpeed() не беру, т.к. в нем самом есть проверка.
-	if s.Weight < 0 || s.Duration.Hours() < 0 {
+	// Проверка на абсурдное значение.
+	if s.Weight < 0 || s.Duration < 0 || s.meanSpeed() <= 0 {
 		return 0
 	}
-	return (s.meanSpeed() + SwimmingCaloriesMeanSpeedShift) * SwimmingCaloriesWeightMultiplier * s.Weight * s.Duration.Hours()
+	return (s.meanSpeed() + SwimmingCaloriesMeanSpeedShift) * SwimmingCaloriesWeightMultiplier *
+		s.Weight * s.Duration.Hours()
 }
 
 // TrainingInfo returns info about swimming training.
@@ -210,6 +215,9 @@ func (s Swimming) TrainingInfo() InfoMessage {
 		Distance:     s.distance(),
 		Speed:        s.meanSpeed(),
 		Calories:     s.Calories(),
+	}
+	if s.Duration < 0 {
+		info.Duration = 0
 	}
 	return info
 }
