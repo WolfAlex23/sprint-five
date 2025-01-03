@@ -29,7 +29,7 @@ type Training struct {
 func (t Training) distance() float64 {
 	// вставьте ваш код ниже
 	// Проверка на абсурдное значение.
-	if t.Action < 0 || t.LenStep < 0 {
+	if t.Action <= 0 || t.LenStep <= 0 {
 		return 0
 	}
 	return float64(t.Action) * t.LenStep / MInKm
